@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lingua Spark Kids Tutor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="bubbles" aria-hidden="true"></div>
+    <div class="page">
+      <header class="hero fade-up">
+        <p class="eyebrow" id="eyebrowText">Kids Tutor</p>
+        <h1 id="appTitle">Lingua Spark Kids</h1>
+        <p id="appSubtitle">Learn first words and phrases with mini games.</p>
+
+        <div class="stats-row" aria-live="polite">
+          <div class="stat-chip">
+            <span id="starsLabel">Stars</span>
+            <strong id="starsCount">0</strong>
+          </div>
+          <div class="stat-chip">
+            <span id="streakLabel">Streak</span>
+            <strong id="streakCount">0</strong>
+          </div>
+        </div>
+
+        <div class="learning-setup">
+          <div class="setup-item">
+            <label for="nativeLanguageSelect" id="nativeLanguageLabel">My native language</label>
+            <select id="nativeLanguageSelect">
+              <option value="en">English</option>
+              <option value="fr">Francais</option>
+              <option value="es">Espanol</option>
+            </select>
+          </div>
+
+          <div class="setup-item">
+            <p id="learningLanguageLabel">I want to learn (choose 1 or 2)</p>
+            <div class="language-buttons" role="group" aria-label="Learning languages">
+              <button class="lang-btn" data-lang="en" type="button">English</button>
+              <button class="lang-btn is-active" data-lang="fr" type="button">Francais</button>
+              <button class="lang-btn" data-lang="es" type="button">Espanol</button>
+            </div>
+            <p class="helper-text" id="learningHint">Pick one or two learning languages.</p>
+          </div>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel fade-up panel-wide" style="--delay: 80ms">
+          <h2 id="cardsHeading">Flashcards</h2>
+          <p id="cardsIntro">Read the word and phrase, then reveal the meaning.</p>
+
+          <div class="card-box" id="cardBox">
+            <button id="speakCardBtn" class="icon-speak-btn" type="button" aria-label="Read Out">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
+                <path d="M15 9c1.6 1.1 1.6 4.9 0 6"></path>
+                <path d="M17.5 6.5c3.3 2.3 3.3 8.7 0 11"></path>
+              </svg>
+              <span class="sr-only" id="speakLabel">Read Out</span>
+            </button>
+            <p class="card-count" id="cardCount"></p>
+            <img class="card-image" id="cardImage" src="assets/bear-wave.svg" alt="Flashcard image" />
+            <div class="language-card-block">
+              <p class="card-lang-label" id="sourceLabel">Native</p>
+              <p class="card-word" id="sourceWord"></p>
+              <p class="card-phrase" id="sourcePhrase"></p>
+            </div>
+            <div id="targetsContainer"></div>
+            <p class="card-meaning" id="cardMeaning"></p>
+            <p class="card-tip" id="cardTip"></p>
+          </div>
+
+          <div class="button-row">
+            <button id="prevCardBtn" type="button">Previous</button>
+            <button id="nextCardBtn" type="button">Next</button>
+          </div>
+          <p id="speechFeedback" class="feedback" aria-live="polite"></p>
+        </section>
+
+        <section class="panel fade-up" style="--delay: 140ms">
+          <h2 id="guessHeading">Guess The Word</h2>
+          <p id="guessPrompt" class="quiz-question"></p>
+          <div class="options" id="guessOptions"></div>
+          <p id="guessFeedback" class="feedback"></p>
+        </section>
+
+        <section class="panel fade-up" style="--delay: 200ms">
+          <h2 id="phraseHeading">Pick The Phrase</h2>
+          <p id="phrasePrompt" class="quiz-question"></p>
+          <div class="options" id="phraseOptions"></div>
+          <p id="phraseFeedback" class="feedback"></p>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

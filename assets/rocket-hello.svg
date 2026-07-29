@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Rocket hello">
+  <rect width="320" height="200" rx="20" fill="#e8efff"/>
+  <path d="M160 28c34 24 45 66 34 106h-68c-11-40 0-82 34-106z" fill="#ff6b57"/>
+  <path d="M194 134l22 26-32-10" fill="#ff9f1a"/>
+  <path d="M126 134l-22 26 32-10" fill="#ff9f1a"/>
+  <circle cx="160" cy="86" r="18" fill="#c2edff" stroke="#2f7ea2" stroke-width="4"/>
+  <path d="M148 134h24v24h-24z" fill="#2c3555"/>
+  <path d="M152 158h16l-8 24z" fill="#ffd54f"/>
+  <circle cx="62" cy="64" r="8" fill="#ffd54f"/>
+  <circle cx="250" cy="50" r="6" fill="#ffd54f"/>
+  <circle cx="264" cy="96" r="10" fill="#9de3ff"/>
+  <text x="48" y="172" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#24518f">My name is...</text>
+</svg>

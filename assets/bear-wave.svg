@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Bear waving">
+  <rect width="320" height="200" rx="20" fill="#d6f6ff"/>
+  <circle cx="110" cy="82" r="16" fill="#9d6f4c"/>
+  <circle cx="210" cy="82" r="16" fill="#9d6f4c"/>
+  <circle cx="160" cy="100" r="68" fill="#b6845d"/>
+  <circle cx="132" cy="96" r="8" fill="#2d2522"/>
+  <circle cx="188" cy="96" r="8" fill="#2d2522"/>
+  <ellipse cx="160" cy="122" rx="20" ry="14" fill="#f4d2b9"/>
+  <circle cx="160" cy="116" r="5" fill="#3a2a22"/>
+  <path d="M149 129c5 6 17 6 22 0" stroke="#3a2a22" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <circle cx="250" cy="70" r="24" fill="#ffd34d"/>
+  <path d="M242 74c4 4 12 4 16 0" stroke="#7a4a00" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <rect x="230" y="95" width="40" height="58" rx="16" fill="#b6845d"/>
+  <path d="M253 96v-20" stroke="#b6845d" stroke-width="12" stroke-linecap="round"/>
+  <path d="M258 63l20 8" stroke="#b6845d" stroke-width="10" stroke-linecap="round"/>
+  <text x="30" y="36" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#0a5d7a">Hello!</text>
+</svg>

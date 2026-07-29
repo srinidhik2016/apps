@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Apple please">
+  <rect width="320" height="200" rx="20" fill="#e9ffe9"/>
+  <path d="M154 60c-22 2-39 22-39 50 0 30 18 52 45 52s45-22 45-52c0-28-17-48-39-50z" fill="#ff4e4e"/>
+  <path d="M160 54c2-14 16-20 24-20-2 10-8 18-18 22z" fill="#4e8f3a"/>
+  <path d="M160 58c-4-10-16-17-30-15 5 11 14 18 25 20z" fill="#62b24d"/>
+  <circle cx="145" cy="104" r="6" fill="#2f2b2b"/>
+  <circle cx="177" cy="104" r="6" fill="#2f2b2b"/>
+  <path d="M145 120c6 6 20 6 26 0" stroke="#2f2b2b" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <rect x="70" y="140" width="180" height="36" rx="18" fill="#ffffff"/>
+  <text x="111" y="164" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#207f44">Please</text>
+</svg>
