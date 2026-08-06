@@ -1,0 +1,176 @@
+:root {
+  color-scheme: light;
+  --pink-1: #ffe4ef;
+  --pink-2: #ff7fbf;
+  --pink-3: #ff4fa3;
+  --text: #5f2348;
+  --muted: #8a476b;
+  --white: #fffdfd;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, var(--pink-1), #ffd8eb 60%, var(--pink-2));
+  color: var(--text);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(circle, #ffffff 0 3px, transparent 3.4px),
+    radial-gradient(circle, #ffe4ef 0 2.4px, transparent 2.8px),
+    radial-gradient(circle, #ffffff 0 2.6px, transparent 3px),
+    radial-gradient(circle, #ffd7eb 0 2.2px, transparent 2.6px),
+    radial-gradient(circle, #ffffff 0 2.8px, transparent 3.2px),
+    radial-gradient(circle, #ffe4ef 0 2.3px, transparent 2.7px),
+    radial-gradient(circle, #ffffff 0 2.5px, transparent 2.9px),
+    radial-gradient(circle, #ffd7eb 0 2.1px, transparent 2.5px);
+  background-size: 180px 180px, 240px 240px, 300px 300px, 360px 360px, 420px 420px, 480px 480px, 540px 540px, 600px 600px;
+  background-position: 8% 12%, 22% 26%, 36% 16%, 50% 8%, 64% 24%, 78% 14%, 14% 70%, 86% 68%;
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.9));
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 2px, transparent 2.3px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 2px, transparent 2.3px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 2px, transparent 2.3px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 2px, transparent 2.3px);
+  background-size: 220px 220px, 280px 280px, 340px 340px, 400px 400px;
+  background-position: 18% 44%, 34% 62%, 66% 42%, 84% 24%;
+  opacity: 1;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.card {
+  width: min(100%, 480px);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(12px);
+  border: 3px solid var(--pink-3);
+  border-radius: 24px;
+  box-shadow: 0 0 0 2px rgba(255, 79, 163, 0.22), 0 0 22px rgba(255, 79, 163, 0.38), 0 0 40px rgba(255, 79, 163, 0.2);
+  padding: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pink-3);
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+}
+
+.subtitle {
+  margin: 0 0 22px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+label {
+  font-weight: 600;
+}
+
+input,
+select,
+button {
+  border-radius: 12px;
+  border: 1px solid #f5bed7;
+  font: inherit;
+  padding: 12px 14px;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid rgba(255, 79, 163, 0.25);
+  border-color: var(--pink-3);
+}
+
+button {
+  margin-top: 4px;
+  background: linear-gradient(135deg, var(--pink-3), var(--pink-2));
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(255, 79, 163, 0.22);
+}
+
+.result {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #fff5fa;
+  min-height: 72px;
+}
+
+.examples {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #fffdfd;
+  border: 1px solid #f4cfe0;
+}
+
+.examples h3 {
+  margin: 0 0 8px;
+  color: var(--pink-3);
+  font-size: 1rem;
+}
+
+.placeholder,
+.loading,
+.error,
+.hint {
+  margin: 0;
+  color: var(--muted);
+}
+
+.translation {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.error {
+  color: #b13a67;
+  font-weight: 600;
+}

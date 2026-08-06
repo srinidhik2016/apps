@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pink Translator</title>
+    <link rel="stylesheet" href="/app-2/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="card">
+        <p class="eyebrow">🌸 Language Teacher</p>
+        <h1>Say it in another language</h1>
+        <p class="subtitle">
+          Type a word, choose a language, and see the translation plus example sentences.
+        </p>
+
+        <form id="translate-form">
+          <label for="word">Word or phrase</label>
+          <input id="word" name="word" type="text" placeholder="e.g. hello" required />
+
+          <label for="target-language">Translate into</label>
+          <select id="target-language" name="target-language">
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="it">Italian</option>
+            <option value="pt">Portuguese</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
+            <option value="hi">Hindi</option>
+            <option value="ta">Tamil</option>
+          </select>
+
+          <button type="submit">Translate</button>
+        </form>
+
+        <div id="result" class="result" aria-live="polite">
+          <p class="placeholder">Your translation will appear here.</p>
+        </div>
+
+        <div id="examples" class="examples" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="/app-2/app.js"></script>
+  </body>
+</html>
