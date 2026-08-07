@@ -4,6 +4,7 @@ const path = require('path');
 
 const rootDir = '/workspaces/apps';
 const port = process.env.PORT || 3000;
+const host = process.env.HOST || '0.0.0.0';
 const llmUrl = 'https://vibe-proxy-gqv4.onrender.com/v1/chat/completions';
 const llmHeaders = {
   'Content-Type': 'application/json',
@@ -100,12 +101,14 @@ const server = http.createServer(async (req, res) => {
     }
 
     let requestPath = req.url.split('?')[0];
-    if (requestPath === '/') {
+    if (requestPath === '/' || requestPath === '') {
+      requestPath = '/index.html';
+    } else if (requestPath === '/app-2' || requestPath === '/app-2/') {
       requestPath = '/app-2/index.html';
-    }
-
-    if (requestPath === '/app-2' || requestPath === '/app-2/') {
-      requestPath = '/app-2/index.html';
+    } else if (requestPath === '/styles.css') {
+      requestPath = '/app-2/styles.css';
+    } else if (requestPath === '/app.js') {
+      requestPath = '/app-2/app.js';
     }
 
     const filePath = path.join(rootDir, requestPath);
@@ -121,6 +124,6 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(port, () => {
-  console.log(`Server running at http://127.0.0.1:${port}`);
+server.listen(port, host, () => {
+  console.log(`Server running at http://${host}:${port}`);
 });
