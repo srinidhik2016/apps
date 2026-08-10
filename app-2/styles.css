@@ -133,6 +133,39 @@ button:hover {
   box-shadow: 0 8px 18px rgba(255, 79, 163, 0.22);
 }
 
+.direct-llm-toggle-row {
+  margin-top: 12px;
+}
+
+.secondary-button {
+  width: 100%;
+  margin-top: 0;
+  background: #fffdfd;
+  color: var(--pink-3);
+  border: 1px solid #f2bfd7;
+  font-weight: 700;
+}
+
+.secondary-button:hover {
+  transform: none;
+  box-shadow: none;
+  background: #fff2f8;
+}
+
+.direct-llm-panel {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff8fc;
+  border: 1px solid #f3c9db;
+  display: grid;
+  gap: 10px;
+}
+
+.direct-llm-panel[hidden] {
+  display: none !important;
+}
+
 .result {
   margin-top: 18px;
   padding: 14px;

@@ -190,6 +190,109 @@ function normalizeWord(text) {
   return text.trim().toLowerCase();
 }
 
+const defaultDirectLlmEndpoint = 'https://vibe-proxy-gqv4.onrender.com/v1/chat/completions';
+const defaultDirectLlmModel = 'class-chat-model';
+const defaultDirectLlmAuthToken = 'sk-vibe-summer-2026';
+
+function setDirectLlmPanelVisibility(isVisible) {
+  const toggle = document.getElementById('direct-llm-toggle');
+  const panel = document.getElementById('direct-llm-panel');
+  if (!toggle || !panel) {
+    return;
+  }
+
+  toggle.setAttribute('aria-expanded', String(isVisible));
+  toggle.textContent = isVisible ? 'Hide direct LLM' : 'Use direct LLM';
+  panel.hidden = !isVisible;
+  panel.style.display = isVisible ? 'grid' : 'none';
+}
+
+function toggleDirectLlmPanel() {
+  const toggle = document.getElementById('direct-llm-toggle');
+  if (!toggle) {
+    return;
+  }
+
+  const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+  setDirectLlmPanelVisibility(!isExpanded);
+}
+
+function isDirectLlmModeEnabled() {
+  const panel = document.getElementById('direct-llm-panel');
+  return !!panel && !panel.hidden;
+}
+
+function getDirectLlmSettings() {
+  const apiKeyInput = document.getElementById('llm-api-key');
+  const endpointInput = document.getElementById('llm-endpoint');
+  const modelInput = document.getElementById('llm-model');
+
+  return {
+    apiKey: (apiKeyInput?.value || '').trim(),
+    endpoint: (endpointInput?.value || '').trim() || defaultDirectLlmEndpoint,
+    model: (modelInput?.value || '').trim() || defaultDirectLlmModel,
+    authToken: defaultDirectLlmAuthToken
+  };
+}
+
+async function callDirectLlm(prompt, settings) {
+  if (!settings.apiKey) {
+    throw new Error('Please enter an API key to use direct LLM mode.');
+  }
+
+  const endpoint = settings.endpoint || defaultDirectLlmEndpoint;
+  const apiKey = settings.apiKey || settings.authToken || defaultDirectLlmAuthToken;
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: settings.model || defaultDirectLlmModel,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  const bodyText = await response.text();
+  if (!response.ok) {
+    throw new Error(`Direct LLM failed (${response.status}): ${bodyText.slice(0, 180)}`);
+  }
+
+  try {
+    const data = JSON.parse(bodyText);
+    return data?.choices?.[0]?.message?.content?.trim() || '';
+  } catch (error) {
+    throw new Error(`Invalid direct LLM JSON: ${bodyText.slice(0, 180)}`);
+  }
+}
+
+function shouldUseServerApi(origin = '') {
+  if (!origin) {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      origin = window.location.origin;
+    } else {
+      return true;
+    }
+  }
+
+  const normalizedOrigin = String(origin).toLowerCase();
+  if (normalizedOrigin.includes('github.io')) {
+    return false;
+  }
+
+  if (!globalThis.URL) {
+    return true;
+  }
+
+  try {
+    const hostname = new globalThis.URL(origin).hostname;
+    return !hostname.endsWith('github.io') && !hostname.endsWith('.github.io');
+  } catch (error) {
+    return true;
+  }
+}
+
 function setTraceVisibility(isVisible) {
   const traceToggle = document.getElementById('trace-toggle');
   const traceContent = document.getElementById('trace-content');
@@ -228,12 +331,21 @@ function toggleTrace() {
 }
 
 window.toggleTrace = toggleTrace;
+window.toggleDirectLlmPanel = toggleDirectLlmPanel;
 
 const traceToggleButton = document.getElementById('trace-toggle');
 if (traceToggleButton) {
   traceToggleButton.addEventListener('click', (event) => {
     event.preventDefault();
     toggleTrace();
+  });
+}
+
+const directLlmToggleButton = document.getElementById('direct-llm-toggle');
+if (directLlmToggleButton) {
+  directLlmToggleButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    toggleDirectLlmPanel();
   });
 }
 
@@ -514,6 +626,32 @@ async function readJsonResponse(response, label) {
 async function translateText(word, targetLanguage) {
   appendTrace(`Request: translate "${word}" -> ${targetLanguage}`);
 
+  if (isDirectLlmModeEnabled()) {
+    appendTrace('Direct LLM mode enabled');
+    const directSettings = getDirectLlmSettings();
+    const languageName = languageNames[targetLanguage] || 'the selected language';
+    const prompt = `Translate this English word into ${languageName}. Return only the translated word and nothing else. Word: ${word}`;
+
+    try {
+      const reply = await callDirectLlm(prompt, directSettings);
+      const translated = reply.trim().replace(/^['"]|['"]$/g, '');
+      appendTrace(`Direct LLM success: ${translated}`);
+      return { translatedText: translated, usedFallback: false };
+    } catch (error) {
+      appendTrace(`Direct LLM error: ${error.message}`);
+      const immediateFallback = getFallbackTranslation(word, targetLanguage) || word;
+      appendTrace(`Immediate fallback: ${immediateFallback}`);
+      return { translatedText: immediateFallback, usedFallback: true };
+    }
+  }
+
+  if (!shouldUseServerApi(typeof window !== 'undefined' && window.location ? window.location.origin : '')) {
+    appendTrace('Server API unavailable on this host; using client-side fallback');
+    const immediateFallback = getFallbackTranslation(word, targetLanguage) || word;
+    appendTrace(`Immediate fallback: ${immediateFallback}`);
+    return { translatedText: immediateFallback, usedFallback: true };
+  }
+
   const directHappyTranslation = normalizeWord(word) === 'happy' && targetLanguage === 'ta'
     ? 'ஷந்தோஷம்'
     : null;
@@ -600,6 +738,31 @@ function getLocalFallbackContent(word, targetLanguage) {
 
 async function generateExampleSentences(translatedWord, targetLanguage) {
   appendTrace(`Request: examples for "${translatedWord}" in ${targetLanguage}`);
+
+  if (isDirectLlmModeEnabled()) {
+    appendTrace('Direct LLM mode enabled for examples');
+    const directSettings = getDirectLlmSettings();
+    const languageName = languageNames[targetLanguage] || 'the selected language';
+    const prompt = `Create 3 short example sentences in ${languageName} using the word "${translatedWord}". Keep them very simple and add a short English meaning after each sentence.`;
+
+    try {
+      const reply = await callDirectLlm(prompt, directSettings);
+      appendTrace(`Direct LLM example success: ${reply}`);
+      return { content: reply.trim(), usedFallback: false };
+    } catch (error) {
+      appendTrace(`Direct LLM example error: ${error.message}`);
+      const englishMeaning = getEnglishMeaning(translatedWord);
+      const fallback = `Example: "${translatedWord}" means ${englishMeaning}.`;
+      return { content: fallback, usedFallback: true };
+    }
+  }
+
+  if (!shouldUseServerApi(typeof window !== 'undefined' && window.location ? window.location.origin : '')) {
+    appendTrace('Server API unavailable on this host; using built-in examples');
+    const englishMeaning = getEnglishMeaning(translatedWord);
+    const fallback = `Example: "${translatedWord}" means ${englishMeaning}.`;
+    return { content: fallback, usedFallback: true };
+  }
 
   try {
     const response = await fetchWithFallback('/api/examples', {

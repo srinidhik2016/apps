@@ -69,6 +69,15 @@ assert.strictEqual(context.getTransliteration('파인애플', 'ko'), 'painaepeul
 assert.strictEqual(context.getTransliteration('멋진', 'ko'), 'meotjin');
 assert.strictEqual(context.getTransliteration('パイナップル', 'ja'), 'painappuru');
 assert.strictEqual(context.getTransliteration('piña', 'es'), 'pina');
+assert.strictEqual(context.shouldUseServerApi('https://app.github.dev'), true);
+assert.strictEqual(context.shouldUseServerApi('https://srinidhik2016.github.io'), false);
+const directPanel = context.document.getElementById('direct-llm-panel');
+const apiKeyInput = context.document.getElementById('llm-api-key');
+directPanel.hidden = false;
+apiKeyInput.value = 'abc123';
+assert.strictEqual(context.isDirectLlmModeEnabled(), true);
+assert.strictEqual(context.getDirectLlmSettings().apiKey, 'abc123');
+assert.strictEqual(context.getDirectLlmSettings().endpoint, 'https://vibe-proxy-gqv4.onrender.com/v1/chat/completions');
 
 const browserContext = {
   document: createDocumentStub(),

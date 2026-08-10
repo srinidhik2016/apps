@@ -35,6 +35,23 @@
           <button type="submit">Translate</button>
         </form>
 
+        <div class="direct-llm-toggle-row">
+          <button type="button" id="direct-llm-toggle" class="secondary-button" aria-expanded="false">Use direct LLM</button>
+        </div>
+
+        <div id="direct-llm-panel" class="direct-llm-panel" hidden>
+          <label for="llm-api-key">API key</label>
+          <input id="llm-api-key" name="llm-api-key" type="password" placeholder="Paste your API key" />
+
+          <label for="llm-endpoint">Endpoint (editable)</label>
+          <input id="llm-endpoint" name="llm-endpoint" type="text" value="https://vibe-proxy-gqv4.onrender.com/v1/chat/completions" />
+
+          <label for="llm-model">Model (editable)</label>
+          <input id="llm-model" name="llm-model" type="text" value="class-chat-model" />
+
+          <p class="hint">This uses the configured Vibe endpoint and hardcoded headers by default, while the API key field remains editable.</p>
+        </div>
+
         <div id="result" class="result" aria-live="polite">
           <p class="placeholder">Your translation will appear here.</p>
         </div>
@@ -51,6 +68,6 @@
       </section>
     </main>
 
-    <script src="./app.js?v=6"></script>
+    <script src="./app.js?v=7"></script>
   </body>
 </html>
