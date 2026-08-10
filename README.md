@@ -1,7 +1,12 @@
 # Apps
 
-This repository contains simple static web apps.
+This repository contains two simple web apps.
 
-## App 2
+## Landing page
 
-Open [app-2/index.html](app-2/index.html) to view the translation app.
+Open [index.html](index.html) to view the landing page that links to both apps.
+
+## Apps
+
+- [App 1](app-1/index.html)
+- [App 2](app-2/index.html)
