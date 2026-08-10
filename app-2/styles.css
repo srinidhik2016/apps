@@ -205,6 +205,13 @@ button:hover {
 
 .trace-content {
   margin-top: 10px;
+  display: block;
+  visibility: visible;
+}
+
+.trace-content[hidden] {
+  display: none !important;
+  visibility: hidden !important;
 }
 
 .trace-content h3 {

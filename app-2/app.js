@@ -74,10 +74,18 @@ const pronunciationGuide = {
 
 const transliterationGuide = {
   ta: {
-    hello: 'vanakkam',
-    thank: 'nandri',
-    love: 'anbu',
-    friend: 'nanban'
+    வணக்கம்: 'vanakkam',
+    நன்றி: 'nandri',
+    அன்பு: 'anbu',
+    நண்பன்: 'nanban',
+    சோதனை: 'sodhanai'
+  },
+  hi: {
+    नमस्ते: 'namaste',
+    धन्यवाद: 'dhanyavaad',
+    प्यार: 'pyaar',
+    दोस्त: 'dost',
+    परीक्षा: 'pariksha'
   }
 };
 
@@ -94,36 +102,51 @@ function normalizeWord(text) {
   return text.trim().toLowerCase();
 }
 
-function appendTrace(message) {
-  const traceOutput = document.getElementById('trace-output');
-  const traceToggle = document.getElementById('trace-toggle');
-  const traceContent = document.getElementById('trace-content');
-  if (!traceOutput) {
-    return;
-  }
-
-  const existing = traceOutput.textContent === 'No requests yet.' ? '' : `${traceOutput.textContent}\n`;
-  traceOutput.textContent = `${existing}${message}`;
-
-  if (traceToggle && traceContent) {
-    traceToggle.hidden = false;
-    traceToggle.textContent = 'Show trace';
-    traceToggle.setAttribute('aria-expanded', 'false');
-    traceContent.hidden = true;
-  }
-}
-
-function toggleTrace() {
+function setTraceVisibility(isVisible) {
   const traceToggle = document.getElementById('trace-toggle');
   const traceContent = document.getElementById('trace-content');
   if (!traceToggle || !traceContent) {
     return;
   }
 
+  traceToggle.setAttribute('aria-expanded', String(isVisible));
+  traceToggle.textContent = isVisible ? 'Hide trace' : 'Show trace';
+
+  traceContent.hidden = !isVisible;
+  traceContent.style.display = isVisible ? 'block' : 'none';
+  traceContent.style.visibility = isVisible ? 'visible' : 'hidden';
+  traceContent.setAttribute('aria-hidden', String(!isVisible));
+}
+
+function appendTrace(message) {
+  const traceOutput = document.getElementById('trace-output');
+  if (!traceOutput) {
+    return;
+  }
+
+  const existing = traceOutput.textContent === 'No requests yet.' ? '' : `${traceOutput.textContent}\n`;
+  traceOutput.textContent = `${existing}${message}`;
+}
+
+function toggleTrace() {
+  const traceToggle = document.getElementById('trace-toggle');
+  if (!traceToggle) {
+    return;
+  }
+
   const isExpanded = traceToggle.getAttribute('aria-expanded') === 'true';
-  traceToggle.setAttribute('aria-expanded', String(!isExpanded));
-  traceToggle.textContent = isExpanded ? 'Show trace' : 'Hide trace';
-  traceContent.hidden = isExpanded;
+  const nextState = !isExpanded;
+  setTraceVisibility(nextState);
+}
+
+window.toggleTrace = toggleTrace;
+
+const traceToggleButton = document.getElementById('trace-toggle');
+if (traceToggleButton) {
+  traceToggleButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    toggleTrace();
+  });
 }
 
 function getEnglishMeaning(word) {
@@ -151,25 +174,21 @@ function getPronunciation(word, targetLanguage) {
   return pronunciationGuide[targetLanguage]?.[key] || null;
 }
 
+function getTransliteration(word, targetLanguage) {
+  const trimmed = word.trim();
+  return transliterationGuide[targetLanguage]?.[trimmed] || transliterationGuide[targetLanguage]?.[normalizeWord(trimmed)] || null;
+}
+
 function renderResult(translation, targetLanguage, englishMeaning, originalWord) {
   const languageLabel = languageNames[targetLanguage] || 'Selected language';
-  const pronunciation = getPronunciation(originalWord, targetLanguage);
-  const transliteration = transliterationGuide[targetLanguage]?.[normalizeWord(originalWord)] || null;
+  const transliteration = getTransliteration(translation, targetLanguage);
+  const englishReading = transliteration || englishMeaning || originalWord;
 
-  const details = [];
-  details.push(`<p class="translation"><strong>${escapeHtml(translation)}</strong></p>`);
-  details.push(`<p class="hint">${escapeHtml(languageLabel)} translation</p>`);
-  details.push(`<p class="hint">English word: ${escapeHtml(originalWord)}</p>`);
-
-  if (targetLanguage === 'ta') {
-    const tamilWord = translation;
-    details.push(`<p class="hint">Tamil word in English letters: ${escapeHtml(transliteration || tamilWord)}</p>`);
-    if (pronunciation) {
-      details.push(`<p class="hint">Pronunciation: ${escapeHtml(pronunciation)}</p>`);
-    }
-  }
-
-  resultBox.innerHTML = details.join('');
+  resultBox.innerHTML = `
+    <p class="translation"><strong>${escapeHtml(translation)}</strong></p>
+    <p class="hint">${escapeHtml(languageLabel)} translation</p>
+    ${englishReading ? `<p class="hint">English reading: ${escapeHtml(englishReading)}</p>` : ''}
+  `;
 }
 
 async function translateText(word, targetLanguage) {
@@ -250,6 +269,16 @@ const form = document.getElementById('translate-form');
 const resultBox = document.getElementById('result');
 const examplesBox = document.getElementById('examples');
 
+setTraceVisibility(false);
+
+function resetTrace() {
+  const traceOutput = document.getElementById('trace-output');
+  if (traceOutput) {
+    traceOutput.textContent = 'No requests yet.';
+  }
+  setTraceVisibility(false);
+}
+
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
 
@@ -265,7 +294,11 @@ form.addEventListener('submit', async (event) => {
   }
 
   resultBox.innerHTML = '<p class="loading">Translating...</p>';
-  document.getElementById('trace-output').textContent = 'Trace started.\n';
+  resetTrace();
+  const traceOutput = document.getElementById('trace-output');
+  if (traceOutput) {
+    traceOutput.textContent = 'Trace started.\n';
+  }
 
   try {
     const translated = await translateText(word, targetLanguage);

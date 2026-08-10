@@ -44,6 +44,7 @@ function serveStaticFile(res, filePath) {
 }
 
 async function callLlm(prompt) {
+  console.log('[llm] Sending request to external API');
   const response = await fetch(llmUrl, {
     method: 'POST',
     headers: llmHeaders,
@@ -53,11 +54,21 @@ async function callLlm(prompt) {
     })
   });
 
+  console.log(`[llm] Response status: ${response.status}`);
+  const rawText = await response.text();
+  console.log(`[llm] Raw response: ${rawText}`);
+
   if (!response.ok) {
     throw new Error(`LLM request failed: ${response.status}`);
   }
 
-  const data = await response.json();
+  let data;
+  try {
+    data = JSON.parse(rawText);
+  } catch (err) {
+    throw new Error(`Failed to parse LLM JSON: ${err.message}`);
+  }
+
   return data.choices?.[0]?.message?.content || '';
 }
 
@@ -71,12 +82,17 @@ const server = http.createServer(async (req, res) => {
       req.on('end', async () => {
         try {
           const { word, targetLanguage } = JSON.parse(body);
+          console.log(`[translate] Incoming request for word="${word}" targetLanguage="${targetLanguage}"`);
           const prompt = `Translate this English word into ${targetLanguage}. Return only the translated word and nothing else. Word: ${word}`;
           const reply = await callLlm(prompt);
           const translatedText = reply.trim().replace(/^['"]|['"]$/g, '');
+          console.log(`[translate] LLM reply: ${translatedText}`);
           sendJson(res, 200, { translatedText });
         } catch (err) {
-          sendJson(res, 500, { error: err.message });
+          console.error('[translate] LLM request failed, falling back to local translation:', err.message);
+          const { word, targetLanguage } = JSON.parse(body);
+          const fallback = word && targetLanguage ? getFallbackTranslation(word, targetLanguage) || word : word;
+          sendJson(res, 200, { translatedText: fallback });
         }
       });
       return;
@@ -90,11 +106,16 @@ const server = http.createServer(async (req, res) => {
       req.on('end', async () => {
         try {
           const { translatedWord, targetLanguage, languageName } = JSON.parse(body);
+          console.log(`[examples] Incoming request for word="${translatedWord}" targetLanguage="${targetLanguage}"`);
           const prompt = `Create 3 short example sentences in ${languageName || targetLanguage} using the word "${translatedWord}". Keep them very simple and add a short English meaning after each sentence.`;
           const reply = await callLlm(prompt);
+          console.log(`[examples] LLM reply: ${reply}`);
           sendJson(res, 200, { content: reply.trim() });
         } catch (err) {
-          sendJson(res, 500, { error: err.message });
+          console.error('[examples] LLM request failed, falling back to local example text:', err.message);
+          const { translatedWord } = JSON.parse(body);
+          const fallback = `Example: "${translatedWord}" means ${translatedWord}.`;
+          sendJson(res, 200, { content: fallback });
         }
       });
       return;
