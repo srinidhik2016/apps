@@ -164,13 +164,60 @@ button:hover {
 }
 
 .translation {
-  margin: 0;
-  font-size: 1.1rem;
+  margin: 0 0 8px;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--text);
+}
+
+.result .hint {
+  margin: 4px 0;
+  line-height: 1.5;
 }
 
 .error {
   color: #b13a67;
   font-weight: 600;
+}
+
+.trace-panel {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff8fc;
+  border: 1px solid #f3c9db;
+}
+
+.trace-toggle {
+  width: 100%;
+  margin-top: 0;
+  background: #fffdfd;
+  color: var(--pink-3);
+  border: 1px solid #f2bfd7;
+  font-weight: 700;
+}
+
+.trace-toggle:hover {
+  transform: none;
+  box-shadow: none;
+  background: #fff2f8;
+}
+
+.trace-content {
+  margin-top: 10px;
+}
+
+.trace-content h3 {
+  margin: 0 0 8px;
+  color: var(--pink-3);
+  font-size: 1rem;
+}
+
+.trace-content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
 }

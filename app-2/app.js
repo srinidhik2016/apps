@@ -72,6 +72,15 @@ const pronunciationGuide = {
   }
 };
 
+const transliterationGuide = {
+  ta: {
+    hello: 'vanakkam',
+    thank: 'nandri',
+    love: 'anbu',
+    friend: 'nanban'
+  }
+};
+
 function escapeHtml(value) {
   return value
     .replace(/&/g, '&amp;')
@@ -83,6 +92,38 @@ function escapeHtml(value) {
 
 function normalizeWord(text) {
   return text.trim().toLowerCase();
+}
+
+function appendTrace(message) {
+  const traceOutput = document.getElementById('trace-output');
+  const traceToggle = document.getElementById('trace-toggle');
+  const traceContent = document.getElementById('trace-content');
+  if (!traceOutput) {
+    return;
+  }
+
+  const existing = traceOutput.textContent === 'No requests yet.' ? '' : `${traceOutput.textContent}\n`;
+  traceOutput.textContent = `${existing}${message}`;
+
+  if (traceToggle && traceContent) {
+    traceToggle.hidden = false;
+    traceToggle.textContent = 'Show trace';
+    traceToggle.setAttribute('aria-expanded', 'false');
+    traceContent.hidden = true;
+  }
+}
+
+function toggleTrace() {
+  const traceToggle = document.getElementById('trace-toggle');
+  const traceContent = document.getElementById('trace-content');
+  if (!traceToggle || !traceContent) {
+    return;
+  }
+
+  const isExpanded = traceToggle.getAttribute('aria-expanded') === 'true';
+  traceToggle.setAttribute('aria-expanded', String(!isExpanded));
+  traceToggle.textContent = isExpanded ? 'Show trace' : 'Hide trace';
+  traceContent.hidden = isExpanded;
 }
 
 function getEnglishMeaning(word) {
@@ -113,54 +154,96 @@ function getPronunciation(word, targetLanguage) {
 function renderResult(translation, targetLanguage, englishMeaning, originalWord) {
   const languageLabel = languageNames[targetLanguage] || 'Selected language';
   const pronunciation = getPronunciation(originalWord, targetLanguage);
+  const transliteration = transliterationGuide[targetLanguage]?.[normalizeWord(originalWord)] || null;
 
-  resultBox.innerHTML = `
-    <p class="translation"><strong>${escapeHtml(translation)}</strong></p>
-    <p class="hint">${escapeHtml(languageLabel)} translation</p>
-    <p class="hint">English: ${escapeHtml(originalWord)}</p>
-    ${pronunciation ? `<p class="hint">How to say it: ${escapeHtml(pronunciation)}</p>` : ''}
-  `;
+  const details = [];
+  details.push(`<p class="translation"><strong>${escapeHtml(translation)}</strong></p>`);
+  details.push(`<p class="hint">${escapeHtml(languageLabel)} translation</p>`);
+  details.push(`<p class="hint">English word: ${escapeHtml(originalWord)}</p>`);
+
+  if (targetLanguage === 'ta') {
+    const tamilWord = translation;
+    details.push(`<p class="hint">Tamil word in English letters: ${escapeHtml(transliteration || tamilWord)}</p>`);
+    if (pronunciation) {
+      details.push(`<p class="hint">Pronunciation: ${escapeHtml(pronunciation)}</p>`);
+    }
+  }
+
+  resultBox.innerHTML = details.join('');
 }
 
 async function translateText(word, targetLanguage) {
-  const response = await fetch('/api/translate', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      word,
-      targetLanguage
-    })
-  });
+  appendTrace(`Request: translate "${word}" -> ${targetLanguage}`);
 
-  if (!response.ok) {
-    throw new Error('Translation service failed');
+  try {
+    const response = await fetch('/api/translate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        word,
+        targetLanguage
+      })
+    });
+
+    const data = await response.json();
+    appendTrace(`Response status: ${response.status}`);
+    appendTrace(`Response body: ${JSON.stringify(data)}`);
+
+    if (!response.ok) {
+      throw new Error('Translation service failed');
+    }
+
+    if (data.translatedText) {
+      appendTrace(`Using translated text: ${data.translatedText}`);
+      return data.translatedText;
+    }
+  } catch (error) {
+    appendTrace(`Error: ${error.message}`);
   }
 
-  const data = await response.json();
-  return data.translatedText;
+  const fallback = getFallbackTranslation(word, targetLanguage) || word;
+  appendTrace(`Falling back to local translation: ${fallback}`);
+  return fallback;
 }
 
 async function generateExampleSentences(translatedWord, targetLanguage) {
-  const response = await fetch('/api/examples', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      translatedWord,
-      targetLanguage,
-      languageName: languageNames[targetLanguage] || 'the selected language'
-    })
-  });
+  appendTrace(`Request: examples for "${translatedWord}" in ${targetLanguage}`);
 
-  if (!response.ok) {
-    throw new Error('Example sentence generation failed');
+  try {
+    const response = await fetch('/api/examples', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        translatedWord,
+        targetLanguage,
+        languageName: languageNames[targetLanguage] || 'the selected language'
+      })
+    });
+
+    const data = await response.json();
+    appendTrace(`Response status: ${response.status}`);
+    appendTrace(`Response body: ${JSON.stringify(data)}`);
+
+    if (!response.ok) {
+      throw new Error('Example sentence generation failed');
+    }
+
+    if (data.content) {
+      appendTrace(`Using example content: ${data.content}`);
+      return data.content;
+    }
+  } catch (error) {
+    appendTrace(`Error: ${error.message}`);
   }
 
-  const data = await response.json();
-  return data.content || 'No examples available.';
+  const englishMeaning = getEnglishMeaning(translatedWord);
+  const fallback = `Example: "${translatedWord}" means ${englishMeaning}.`;
+  appendTrace(`Falling back to local example text: ${fallback}`);
+  return fallback;
 }
 
 const form = document.getElementById('translate-form');
@@ -182,6 +265,7 @@ form.addEventListener('submit', async (event) => {
   }
 
   resultBox.innerHTML = '<p class="loading">Translating...</p>';
+  document.getElementById('trace-output').textContent = 'Trace started.\n';
 
   try {
     const translated = await translateText(word, targetLanguage);
