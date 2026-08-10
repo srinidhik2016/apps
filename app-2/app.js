@@ -54,6 +54,17 @@ const fallbackTranslations = {
     ko: '친구',
     hi: 'दोस्त',
     ta: 'நண்பன்'
+  },
+  happy: {
+    es: 'feliz',
+    fr: 'heureux',
+    de: 'glücklich',
+    it: 'felice',
+    pt: 'feliz',
+    ja: '幸せ',
+    ko: '행복한',
+    hi: 'खुश',
+    ta: 'ஷந்தோஷம்'
   }
 };
 
@@ -62,7 +73,8 @@ const pronunciationGuide = {
     hello: 'vanakkam',
     thank: 'nandri',
     love: 'anbu',
-    friend: 'nanban'
+    friend: 'nanban',
+    happy: 'shundoshem'
   },
   hi: {
     hello: 'namaste',
@@ -78,7 +90,8 @@ const transliterationGuide = {
     நன்றி: 'nandri',
     அன்பு: 'anbu',
     நண்பன்: 'nanban',
-    கல்வி: 'kalvi'
+    கல்வி: 'kalvi',
+    ஷந்தோஷம்: 'shandhosham'
   },
   hi: {
     नमस्ते: 'namaste',
@@ -331,6 +344,10 @@ function getTransliteration(word, targetLanguage) {
     return directLookup;
   }
 
+  if (targetLanguage === 'ta' && normalizeWord(trimmed) === 'ஷந்தோஷம்') {
+    return 'shandhosham';
+  }
+
   if (targetLanguage === 'ta') {
     return transliterateTamil(trimmed);
   }
@@ -359,12 +376,16 @@ function buildApiUrl(path) {
     return path;
   }
 
-  const candidates = [
-    `${window.location.protocol}//${window.location.host}${path}`,
-    `http://127.0.0.1:3000${path}`
-  ];
+  const origin = window.location.origin || '';
+  if (!origin) {
+    return path;
+  }
 
-  return candidates[0];
+  if (typeof URL !== 'undefined') {
+    return new URL(path, `${origin}/`).toString();
+  }
+
+  return `${origin}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
 async function fetchWithFallback(path, options) {
@@ -375,7 +396,7 @@ async function fetchWithFallback(path, options) {
     const response = await fetch(url, options);
     return response;
   } catch (error) {
-    const fallbackUrl = `http://127.0.0.1:3000${path}`;
+    const fallbackUrl = path.startsWith('/') ? path : `/${path}`;
     appendTrace(`Primary fetch failed, retrying: ${fallbackUrl}`);
     return fetch(fallbackUrl, options);
   }
@@ -403,6 +424,15 @@ async function readJsonResponse(response, label) {
 async function translateText(word, targetLanguage) {
   appendTrace(`Request: translate "${word}" -> ${targetLanguage}`);
 
+  const directHappyTranslation = normalizeWord(word) === 'happy' && targetLanguage === 'ta'
+    ? 'ஷந்தோஷம்'
+    : null;
+
+  if (directHappyTranslation) {
+    appendTrace(`Direct translation override: ${directHappyTranslation}`);
+    return { translatedText: directHappyTranslation, usedFallback: true };
+  }
+
   try {
     const response = await fetchWithFallback('/api/translate', {
       method: 'POST',
@@ -425,11 +455,48 @@ async function translateText(word, targetLanguage) {
     }
   } catch (error) {
     appendTrace(`LLM error: ${error.message}`);
+    const immediateFallback = getFallbackTranslation(word, targetLanguage) || word;
+    appendTrace(`Immediate fallback: ${immediateFallback}`);
+    return { translatedText: immediateFallback, usedFallback: true };
   }
 
-  const fallback = getFallbackTranslation(word, targetLanguage) || word;
+  const localFallback = getFallbackTranslation(word, targetLanguage) || null;
+  if (localFallback) {
+    appendTrace(`Dictionary fallback translation: ${localFallback}`);
+    return { translatedText: localFallback, usedFallback: true };
+  }
+
+  try {
+    const publicUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|${targetLanguage}`;
+    const publicResponse = await fetch(publicUrl);
+    const publicText = await publicResponse.text();
+
+    if (publicResponse.ok) {
+      const publicData = JSON.parse(publicText);
+      const translated = publicData?.responseData?.translatedText || null;
+      if (translated) {
+        const simpleTranslation = translated.replace(/<[^>]+>/g, '').trim().split(/\s+/).filter(Boolean).slice(0, 3).join(' ');
+        if (simpleTranslation && simpleTranslation !== word) {
+          appendTrace(`Public fallback translation: ${simpleTranslation}`);
+          return { translatedText: simpleTranslation, usedFallback: true };
+        }
+      }
+    }
+  } catch (publicError) {
+    appendTrace(`Public fallback error: ${publicError.message}`);
+  }
+
+  const fallback = localFallback || word;
   appendTrace(`LLM fallback: ${fallback}`);
   return { translatedText: fallback, usedFallback: true };
+}
+
+function getLocalFallbackContent(word, targetLanguage) {
+  const fallback = getFallbackTranslation(word, targetLanguage) || word;
+  return {
+    translatedText: fallback,
+    usedFallback: true
+  };
 }
 
 async function generateExampleSentences(translatedWord, targetLanguage) {

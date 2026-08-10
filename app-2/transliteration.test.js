@@ -60,4 +60,18 @@ assert.strictEqual(context.getTransliteration('கல்வி', 'ta'), 'kalvi')
 assert.match(context.getTransliteration('வணக்கம்', 'ta'), /va|van/i);
 assert.match(context.getTransliteration('नमस्ते', 'hi'), /namaste|na/i);
 
+const browserContext = {
+  document: createDocumentStub(),
+  location: { origin: 'https://app.example.test' },
+  console,
+  fetch: async () => ({ ok: true, json: async () => ({}) }),
+  setTimeout,
+  clearTimeout
+};
+browserContext.window = browserContext;
+
+vm.createContext(browserContext);
+vm.runInContext(appCode, browserContext);
+assert.strictEqual(browserContext.buildApiUrl('/api/translate'), 'https://app.example.test/api/translate');
+
 console.log('Transliteration tests passed');
