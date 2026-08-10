@@ -354,11 +354,57 @@ function renderResult(translation, targetLanguage, englishMeaning, originalWord)
   `;
 }
 
+function buildApiUrl(path) {
+  if (typeof window === 'undefined' || !window.location) {
+    return path;
+  }
+
+  const candidates = [
+    `${window.location.protocol}//${window.location.host}${path}`,
+    `http://127.0.0.1:3000${path}`
+  ];
+
+  return candidates[0];
+}
+
+async function fetchWithFallback(path, options) {
+  const url = buildApiUrl(path);
+  appendTrace(`Request URL: ${url}`);
+
+  try {
+    const response = await fetch(url, options);
+    return response;
+  } catch (error) {
+    const fallbackUrl = `http://127.0.0.1:3000${path}`;
+    appendTrace(`Primary fetch failed, retrying: ${fallbackUrl}`);
+    return fetch(fallbackUrl, options);
+  }
+}
+
+async function readJsonResponse(response, label) {
+  const contentType = response.headers.get('content-type') || '';
+  const bodyText = await response.text();
+
+  if (!response.ok) {
+    throw new Error(`${label} failed (${response.status}): ${bodyText.slice(0, 180)}`);
+  }
+
+  if (!contentType.includes('application/json')) {
+    throw new Error(`Expected JSON from ${label}, received ${contentType || 'unknown'}: ${bodyText.slice(0, 180)}`);
+  }
+
+  try {
+    return JSON.parse(bodyText);
+  } catch (error) {
+    throw new Error(`Invalid JSON from ${label}: ${bodyText.slice(0, 180)}`);
+  }
+}
+
 async function translateText(word, targetLanguage) {
   appendTrace(`Request: translate "${word}" -> ${targetLanguage}`);
 
   try {
-    const response = await fetch('/api/translate', {
+    const response = await fetchWithFallback('/api/translate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -369,13 +415,9 @@ async function translateText(word, targetLanguage) {
       })
     });
 
-    const data = await response.json();
+    const data = await readJsonResponse(response, 'translate API');
     appendTrace(`Response status: ${response.status}`);
     appendTrace(`Response body: ${JSON.stringify(data)}`);
-
-    if (!response.ok) {
-      throw new Error('Translation service failed');
-    }
 
     if (data.translatedText) {
       appendTrace(`LLM success: ${data.translatedText}`);
@@ -394,7 +436,7 @@ async function generateExampleSentences(translatedWord, targetLanguage) {
   appendTrace(`Request: examples for "${translatedWord}" in ${targetLanguage}`);
 
   try {
-    const response = await fetch('/api/examples', {
+    const response = await fetchWithFallback('/api/examples', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -406,13 +448,9 @@ async function generateExampleSentences(translatedWord, targetLanguage) {
       })
     });
 
-    const data = await response.json();
+    const data = await readJsonResponse(response, 'examples API');
     appendTrace(`Response status: ${response.status}`);
     appendTrace(`Response body: ${JSON.stringify(data)}`);
-
-    if (!response.ok) {
-      throw new Error('Example sentence generation failed');
-    }
 
     if (data.content) {
       appendTrace(`LLM example success: ${data.content}`);
