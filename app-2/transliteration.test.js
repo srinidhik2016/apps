@@ -59,6 +59,16 @@ assert.strictEqual(context.getTransliteration('சோதனை', 'ta'), 'sodhana
 assert.strictEqual(context.getTransliteration('கல்வி', 'ta'), 'kalvi');
 assert.match(context.getTransliteration('வணக்கம்', 'ta'), /va|van/i);
 assert.match(context.getTransliteration('नमस्ते', 'hi'), /namaste|na/i);
+assert.strictEqual(context.getTransliteration('こんにちは', 'ja'), 'konnichiwa');
+assert.strictEqual(context.getTransliteration('안녕하세요', 'ko'), 'annyeonghaseyo');
+assert.strictEqual(context.getTransliteration('시험', 'ko'), 'siheom');
+assert.strictEqual(context.getTransliteration('teste', 'pt'), 'tesh-tee');
+assert.strictEqual(context.getTransliteration('test', 'it'), 'test');
+assert.strictEqual(context.getTransliteration('feliz', 'es'), 'feliz');
+assert.strictEqual(context.getTransliteration('파인애플', 'ko'), 'painaepeul');
+assert.strictEqual(context.getTransliteration('멋진', 'ko'), 'meotjin');
+assert.strictEqual(context.getTransliteration('パイナップル', 'ja'), 'painappuru');
+assert.strictEqual(context.getTransliteration('piña', 'es'), 'pina');
 
 const browserContext = {
   document: createDocumentStub(),
