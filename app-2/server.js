@@ -124,6 +124,8 @@ const server = http.createServer(async (req, res) => {
     let requestPath = req.url.split('?')[0];
     if (requestPath === '/' || requestPath === '') {
       requestPath = '/index.html';
+    } else if (requestPath === '/app-1' || requestPath === '/app-1/') {
+      requestPath = '/app-1/index.html';
     } else if (requestPath === '/app-2' || requestPath === '/app-2/') {
       requestPath = '/app-2/index.html';
     } else if (requestPath === '/styles.css') {
