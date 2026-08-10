@@ -78,7 +78,7 @@ const transliterationGuide = {
     நன்றி: 'nandri',
     அன்பு: 'anbu',
     நண்பன்: 'nanban',
-    சோதனை: 'sodhanai'
+    கல்வி: 'kalvi'
   },
   hi: {
     नमस्ते: 'namaste',
@@ -174,9 +174,172 @@ function getPronunciation(word, targetLanguage) {
   return pronunciationGuide[targetLanguage]?.[key] || null;
 }
 
+function transliterateTamil(word) {
+  const vowelMap = {
+    'அ': 'a',
+    'ஆ': 'aa',
+    'இ': 'i',
+    'ஈ': 'ee',
+    'உ': 'u',
+    'ஊ': 'oo',
+    'எ': 'e',
+    'ஏ': 'ee',
+    'ஐ': 'ai',
+    'ஒ': 'o',
+    'ஓ': 'o',
+    'ஔ': 'au',
+    'ா': 'a',
+    'ி': 'i',
+    'ீ': 'ee',
+    'ு': 'u',
+    'ூ': 'oo',
+    'ெ': 'e',
+    'ே': 'ee',
+    'ை': 'ai',
+    'ொ': 'o',
+    'ோ': 'o',
+    'ௌ': 'au'
+  };
+  const consonantMap = {
+    'க': 'k',
+    'ங': 'ng',
+    'ச': 's',
+    'ஜ': 'j',
+    'ஞ': 'ny',
+    'ட': 't',
+    'ண': 'n',
+    'த': 'dh',
+    'ந': 'n',
+    'ப': 'p',
+    'ம': 'm',
+    'ய': 'y',
+    'ர': 'r',
+    'ல': 'l',
+    'வ': 'v',
+    'ழ': 'zh',
+    'ள': 'l',
+    'ற': 'r',
+    'ன': 'n'
+  };
+
+  let result = '';
+  const chars = Array.from(word);
+
+  chars.forEach((char, index) => {
+    if (char === '்') {
+      return;
+    }
+
+    if (vowelMap[char]) {
+      result += vowelMap[char];
+      return;
+    }
+
+    if (consonantMap[char]) {
+      const nextChar = chars[index + 1];
+      const nextIsConsonant = !!nextChar && !!consonantMap[nextChar];
+      const value = nextIsConsonant ? `${consonantMap[char]}a` : consonantMap[char];
+      result += value;
+    }
+  });
+
+  return result.replace(/aa/g, 'a').replace(/ee/g, 'e').replace(/oo/g, 'u').replace(/ss/g, 's');
+}
+
+function transliterateHindi(word) {
+  const vowelMap = {
+    'अ': 'a',
+    'आ': 'aa',
+    'इ': 'i',
+    'ई': 'ee',
+    'उ': 'u',
+    'ऊ': 'oo',
+    'ए': 'e',
+    'ऐ': 'ai',
+    'ओ': 'o',
+    'औ': 'au',
+    'ा': 'a',
+    'ि': 'i',
+    'ी': 'ee',
+    'ु': 'u',
+    'ू': 'oo',
+    'े': 'e',
+    'ै': 'ai',
+    'ो': 'o',
+    'ौ': 'au'
+  };
+  const consonantMap = {
+    'क': 'k',
+    'ख': 'kh',
+    'ग': 'g',
+    'घ': 'gh',
+    'च': 'ch',
+    'छ': 'chh',
+    'ज': 'j',
+    'झ': 'jh',
+    'ञ': 'ny',
+    'ट': 't',
+    'ठ': 'th',
+    'ड': 'd',
+    'ढ': 'dh',
+    'ण': 'n',
+    'त': 't',
+    'थ': 'th',
+    'द': 'd',
+    'ध': 'dh',
+    'न': 'n',
+    'प': 'p',
+    'फ': 'ph',
+    'ब': 'b',
+    'भ': 'bh',
+    'म': 'm',
+    'य': 'y',
+    'र': 'r',
+    'ल': 'l',
+    'व': 'v',
+    'श': 'sh',
+    'ष': 'sh',
+    'स': 's',
+    'ह': 'h'
+  };
+
+  let result = '';
+  const chars = Array.from(word);
+
+  chars.forEach((char) => {
+    if (vowelMap[char]) {
+      result += vowelMap[char];
+      return;
+    }
+
+    if (consonantMap[char]) {
+      result += consonantMap[char];
+    }
+  });
+
+  return result.replace(/aa/g, 'a').replace(/ee/g, 'e').replace(/oo/g, 'u');
+}
+
 function getTransliteration(word, targetLanguage) {
   const trimmed = word.trim();
-  return transliterationGuide[targetLanguage]?.[trimmed] || transliterationGuide[targetLanguage]?.[normalizeWord(trimmed)] || null;
+  if (!trimmed) {
+    return null;
+  }
+
+  const directLookup = transliterationGuide[targetLanguage]?.[trimmed] || transliterationGuide[targetLanguage]?.[normalizeWord(trimmed)];
+  if (directLookup) {
+    return directLookup;
+  }
+
+  if (targetLanguage === 'ta') {
+    return transliterateTamil(trimmed);
+  }
+
+  if (targetLanguage === 'hi') {
+    return transliterateHindi(trimmed);
+  }
+
+  return null;
 }
 
 function renderResult(translation, targetLanguage, englishMeaning, originalWord) {
@@ -215,16 +378,16 @@ async function translateText(word, targetLanguage) {
     }
 
     if (data.translatedText) {
-      appendTrace(`Using translated text: ${data.translatedText}`);
-      return data.translatedText;
+      appendTrace(`LLM success: ${data.translatedText}`);
+      return { translatedText: data.translatedText, usedFallback: false };
     }
   } catch (error) {
-    appendTrace(`Error: ${error.message}`);
+    appendTrace(`LLM error: ${error.message}`);
   }
 
   const fallback = getFallbackTranslation(word, targetLanguage) || word;
-  appendTrace(`Falling back to local translation: ${fallback}`);
-  return fallback;
+  appendTrace(`LLM fallback: ${fallback}`);
+  return { translatedText: fallback, usedFallback: true };
 }
 
 async function generateExampleSentences(translatedWord, targetLanguage) {
@@ -252,17 +415,17 @@ async function generateExampleSentences(translatedWord, targetLanguage) {
     }
 
     if (data.content) {
-      appendTrace(`Using example content: ${data.content}`);
-      return data.content;
+      appendTrace(`LLM example success: ${data.content}`);
+      return { content: data.content, usedFallback: false };
     }
   } catch (error) {
-    appendTrace(`Error: ${error.message}`);
+    appendTrace(`LLM example error: ${error.message}`);
   }
 
   const englishMeaning = getEnglishMeaning(translatedWord);
   const fallback = `Example: "${translatedWord}" means ${englishMeaning}.`;
-  appendTrace(`Falling back to local example text: ${fallback}`);
-  return fallback;
+  appendTrace(`LLM example fallback: ${fallback}`);
+  return { content: fallback, usedFallback: true };
 }
 
 const form = document.getElementById('translate-form');
@@ -301,11 +464,13 @@ form.addEventListener('submit', async (event) => {
   }
 
   try {
-    const translated = await translateText(word, targetLanguage);
+    const translationResult = await translateText(word, targetLanguage);
+    const translated = translationResult.translatedText;
     renderResult(translated, targetLanguage, getEnglishMeaning(word), word);
 
     try {
-      const sentenceText = await generateExampleSentences(translated, targetLanguage);
+      const exampleResult = await generateExampleSentences(translated, targetLanguage);
+      const sentenceText = exampleResult.content;
       examplesBox.innerHTML = `
         <h3>Example sentences</h3>
         <p class="hint">${escapeHtml(sentenceText).replace(/\n/g, '<br><br>')}</p>
@@ -320,7 +485,8 @@ form.addEventListener('submit', async (event) => {
       renderResult(fallback, targetLanguage, getEnglishMeaning(word), word);
 
       try {
-        const sentenceText = await generateExampleSentences(fallback, targetLanguage);
+        const exampleResult = await generateExampleSentences(fallback, targetLanguage);
+        const sentenceText = exampleResult.content;
         examplesBox.innerHTML = `
           <h3>Example sentences</h3>
           <p class="hint">${escapeHtml(sentenceText).replace(/\n/g, '<br><br>')}</p>
