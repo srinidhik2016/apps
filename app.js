@@ -9,7 +9,14 @@ let spellingNeedsAge = false;
 let spellingHasNextChallenge = false;
 let learnerAge = null;
 let writingTask = null;
+let historyTopic = null;
 let userProfile = { name: 'You', avatar: '🐰' };
+try {
+  const savedProfile = JSON.parse(localStorage.getItem('mathly-profile') || 'null');
+  if (savedProfile?.name && savedProfile?.avatar) userProfile = savedProfile;
+} catch (error) {
+  localStorage.removeItem('mathly-profile');
+}
 const chatHistories = { math: chatWall.innerHTML, spelling: null, history: null };
 
 const spellingAnswers = {
@@ -30,6 +37,16 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+function applyUserProfile() {
+  const profileButton = document.querySelector('#user-profile-button');
+  profileButton.textContent = userProfile.avatar;
+  profileButton.setAttribute('aria-label', `Profile: ${userProfile.name}`);
+  document.querySelectorAll('.rabbit-avatar').forEach((profileAvatar) => {
+    profileAvatar.textContent = userProfile.avatar;
+    profileAvatar.setAttribute('aria-label', userProfile.name);
+  });
 }
 
 function tutorAnswer(problem) {
@@ -78,24 +95,42 @@ function tutorAnswer(problem) {
 function historyAnswer(problem) {
   const text = problem.toLowerCase();
   if (/titanic|tietanec|tietanic|titanec|titanik/.test(text)) {
+    historyTopic = 'titanic';
     return '<span class="answer-title">The Titanic sank on April 15, 1912. 🚢</span><p>The RMS Titanic hit an iceberg during its first voyage across the North Atlantic and sank in the early morning. It was traveling from Southampton to New York.</p>';
   }
   if (/egypt|pyramid|pharaoh/.test(text)) {
+    historyTopic = 'egypt';
     return '<span class="answer-title">Ancient Egypt 📜</span><p>Ancient Egyptians built pyramids as tombs for pharaohs. They developed writing called hieroglyphics and used the Nile River for farming, travel, and water.</p>';
   }
   if (/rome|roman|caesar/.test(text)) {
+    historyTopic = 'rome';
     return '<span class="answer-title">Ancient Rome 🏛️</span><p>Rome grew from a city into a huge empire. Julius Caesar was a famous Roman leader, and Roman roads, laws, buildings, and language influenced many places.</p>';
   }
   if (/dinosaur|prehistoric/.test(text)) {
+    historyTopic = 'dinosaurs';
     return '<span class="answer-title">Dinosaurs 🦖</span><p>Dinosaurs lived millions of years ago. Some ate plants, some ate meat, and birds are their living relatives. Scientists learn about them from fossils.</p>';
   }
   if (/world war\s*(?:1|one).*world war\s*(?:2|two)|world war\s*(?:1|one).*2|wwi.*wwii|ww1.*ww2/.test(text)) {
+    historyTopic = 'world-wars';
     return '<span class="answer-title">World War I and World War II 🌍</span><p><strong>World War I</strong> lasted from 1914 to 1918. <strong>World War II</strong> lasted from 1939 to 1945. They were separate global wars involving many countries, and both changed borders, governments, and daily life around the world.</p><p>World War II happened about 21 years after World War I ended.</p>';
   }
   if (/world war|wwii|ww2/.test(text)) {
+    historyTopic = 'world-war-2';
     return '<span class="answer-title">World War II 🌍</span><p>World War II lasted from 1939 to 1945. Many countries took part, and the war changed borders, governments, and daily life around the world.</p>';
   }
   return '<span class="answer-title">Let’s explore history! 📚</span><p>Ask me about Ancient Egypt, Rome, dinosaurs, World War II, famous people, inventions, or another time in history.</p>';
+}
+
+function historyFollowUp() {
+  const followUps = {
+    titanic: '<span class="answer-title">More about the Titanic 🚢</span><p>The ship struck the iceberg late on April 14, 1912. It sank a few hours later, in the early morning of April 15. More than 1,500 people died, and the disaster led to stronger international safety rules for ships.</p>',
+    egypt: '<span class="answer-title">More about Ancient Egypt 📜</span><p>Ancient Egyptian society included farmers, craftspeople, scribes, soldiers, and rulers. The Nile’s yearly floods helped farmers grow food, while scribes recorded laws, stories, and trade.</p>',
+    rome: '<span class="answer-title">More about Ancient Rome 🏛️</span><p>Roman power spread around the Mediterranean through armies, roads, trade, and government. Latin, Roman law, and engineering influenced many later societies.</p>',
+    dinosaurs: '<span class="answer-title">More about dinosaurs 🦖</span><p>Fossils show that dinosaurs lived on every continent. Some dinosaurs had feathers, and a major extinction event about 66 million years ago ended the age of non-bird dinosaurs.</p>',
+    'world-war-2': '<span class="answer-title">More about World War II 🌍</span><p>The war included the Holocaust, the attack on Pearl Harbor, major battles in Europe and the Pacific, and the D-Day invasion. It ended in 1945 after Germany and Japan surrendered.</p>',
+    'world-wars': '<span class="answer-title">More about both world wars 🌍</span><p>World War I was strongly connected to rival alliances and competition between empires. World War II grew from unresolved tensions after World War I, aggressive expansion, and the rise of Nazi Germany.</p>'
+  };
+  return followUps[historyTopic] || '<span class="answer-title">Tell me which history topic you want to explore.</span><p>You can ask about the Titanic, World War II, Ancient Egypt, Rome, or dinosaurs.</p>';
 }
 
 function spellingAnswer(problem) {
@@ -238,6 +273,8 @@ function sendProblem(problem) {
       : currentMode === 'history'
         ? /^(?:hi|hello)\b/i.test(problem.trim())
           ? '<span class="answer-title">Hello! 👋</span><p>Ready to explore history?</p>'
+          : historyTopic && /tell me more|more about|explain more|what else/i.test(problem)
+            ? historyFollowUp()
           : historyAnswer(problem)
       : /^(?:hi|hello)\b/i.test(problem.trim())
         ? '<span class="answer-title">Hello! 👋</span><p>Ready for a spelling challenge?</p>'
@@ -286,6 +323,7 @@ document.querySelector('#clear-chat').addEventListener('click', () => {
   spellingChallengeWord = null;
   spellingHasNextChallenge = false;
   writingTask = null;
+  historyTopic = null;
   spellingNeedsAge = currentMode === 'spelling';
   addMessage(currentMode === 'math' ? 'Fresh page, fresh problem. What are we working on?' : currentMode === 'spelling' ? 'Fresh chat! How many years old are you?' : 'Fresh history chat! What time or event would you like to explore?', 'tutor');
 });
@@ -310,14 +348,11 @@ document.querySelector('#user-profile-button').addEventListener('click', () => {
   const avatar = window.prompt('Choose any emoji or symbol for your profile:', userProfile.avatar);
   userProfile.name = name.trim() || 'You';
   userProfile.avatar = avatar?.trim() || '🐰';
-  const profileButton = document.querySelector('#user-profile-button');
-  profileButton.textContent = userProfile.avatar;
-  profileButton.setAttribute('aria-label', `Profile: ${userProfile.name}`);
-  document.querySelectorAll('.rabbit-avatar').forEach((profileAvatar) => {
-    profileAvatar.textContent = userProfile.avatar;
-    profileAvatar.setAttribute('aria-label', userProfile.name);
-  });
+  localStorage.setItem('mathly-profile', JSON.stringify(userProfile));
+  applyUserProfile();
 });
+
+applyUserProfile();
 
 modeButton.addEventListener('click', () => {
   chatHistories[currentMode] = chatWall.innerHTML;
