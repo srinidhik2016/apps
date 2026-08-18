@@ -3,63 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#075e54" />
-    <title>Mathly | Your math study buddy</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <title>Apps</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="chat-app">
-      <header class="topbar">
-        <button class="back-button" type="button" aria-label="Back to chats" title="Back to chats">‹</button>
-        <div class="brand-mark" aria-hidden="true">🧮</div>
-        <div class="profile-copy">
-          <h1 class="mode-name" id="mode-name">Mathly</h1>
-        </div>
-        <button class="user-profile-button" id="user-profile-button" type="button" aria-label="Change your profile" title="Change your profile">🐰</button>
-        <button class="mode-button" id="mode-button" type="button" aria-label="Switch to spelling tutor">Spell</button>
-        <button class="icon-button" id="clear-chat" type="button" aria-label="Clear chat" title="Clear chat">⌫</button>
-        <button class="icon-button" id="chat-menu" type="button" aria-label="Open menu" title="Open menu">⋮</button>
-        <div class="chat-menu-panel" id="chat-menu-panel" hidden>
-          <button type="button" data-menu-action="profile">Change profile</button>
-          <button type="button" data-menu-action="tutor">Switch tutor</button>
-          <button type="button" data-menu-action="clear">Clear chat</button>
-        </div>
-      </header>
-
-      <section class="chat-wall" id="chat-wall" aria-live="polite">
-        <div class="date-chip">TODAY</div>
-        <div class="message-row tutor-row">
-          <div class="avatar small-avatar bot-avatar" aria-hidden="true">🧮</div>
-          <div class="bubble tutor-bubble">
-            <p id="welcome-message">Hey! I’m Mathly. Send me any math problem and I’ll walk through it with you, step by step.</p>
-            <time>9:41 AM</time>
-          </div>
-        </div>
-        <div class="message-row tutor-row">
-          <div class="avatar small-avatar bot-avatar" aria-hidden="true">🧮</div>
-          <div class="bubble tutor-bubble welcome-bubble">
-            <p>Try one of these to get started:</p>
-            <div class="suggestions">
-              <button type="button" data-prompt="What is 15% of 80?">15% of 80</button>
-              <button type="button" data-prompt="Solve 3x + 5 = 20">Solve 3x + 5 = 20</button>
-              <button type="button" data-prompt="What is 3/4 + 1/8?">3/4 + 1/8</button>
-            </div>
-            <time>9:41 AM</time>
-          </div>
-        </div>
-      </section>
-
-      <form class="composer" id="chat-form">
-        <button class="round-button" type="button" id="attach-button" aria-label="Attach a problem" title="Attach a problem">＋</button>
-        <label class="sr-only" for="message-input">Type a math problem</label>
-        <input id="message-input" autocomplete="off" placeholder="Type a math problem..." required />
-        <button class="send-button" type="submit" aria-label="Send message" title="Send message">➤</button>
-      </form>
-      <p class="privacy-note" id="privacy-note">Mathly is here to explain, not just give answers.</p>
+    <main class="landing">
+      <h1>Apps</h1>
+      <ul class="app-list">
+        <li>
+          <a href="app-1/">Lingua Spark Kids Tutor</a>
+          <p>Learn first words and phrases with mini games.</p>
+        </li>
+        <li>
+          <a href="app-2/">Pink Translator</a>
+          <p>Type a word, choose a language, and see the translation plus example sentences.</p>
+        </li>
+        <li>
+          <a href="app-3/">Name Spinner</a>
+          <p>Give the wheel a click and let the names decide.</p>
+        </li>
+        <li>
+          <a href="app-4/">Mathly</a>
+          <p>Your math study buddy, step by step.</p>
+        </li>
+      </ul>
     </main>
-    <script src="./app.js?v=18"></script>
   </body>
 </html>

@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const rootDir = '/workspaces/apps';
+const rootDir = path.join(__dirname, '..');
 const port = process.env.PORT || 3000;
 const host = process.env.HOST || '0.0.0.0';
 const llmUrl = 'https://vibe-proxy-gqv4.onrender.com/v1/chat/completions';
@@ -225,6 +225,10 @@ const server = http.createServer(async (req, res) => {
       requestPath = '/app-1/index.html';
     } else if (requestPath === '/app-2' || requestPath === '/app-2/') {
       requestPath = '/app-2/index.html';
+    } else if (requestPath === '/app-3' || requestPath === '/app-3/') {
+      requestPath = '/app-3/index.html';
+    } else if (requestPath === '/app-4' || requestPath === '/app-4/') {
+      requestPath = '/app-4/index.html';
     } else if (requestPath === '/styles.css') {
       requestPath = '/app-2/styles.css';
     } else if (requestPath === '/app.js') {
