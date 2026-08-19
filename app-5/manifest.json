@@ -1,5 +1,5 @@
 {
-  "name": "Recall | Your work memory assistant",
+  "name": "Recall",
   "short_name": "Recall",
   "description": "Tell Recall about your work day and ask about it any time after.",
   "start_url": "./index.html",
