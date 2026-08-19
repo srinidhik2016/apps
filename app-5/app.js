@@ -253,6 +253,7 @@ document.querySelector('#clear-chat').addEventListener('click', () => {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+    // Force a check for the self-destructing worker so old cached devices clean up quickly.
+    navigator.serviceWorker.getRegistration().then((registration) => registration?.update());
   });
 }
