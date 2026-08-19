@@ -26,6 +26,7 @@ function saveMemories() {
 }
 
 let memories = loadMemories();
+pruneOldMemories();
 
 function pad(value) {
   return String(value).padStart(2, '0');
@@ -45,6 +46,15 @@ function addDays(date, amount) {
   const result = new Date(date);
   result.setDate(result.getDate() + amount);
   return result;
+}
+
+function pruneOldMemories() {
+  const cutoff = dateKey(addDays(startOfDay(new Date()), -6));
+  const kept = memories.filter((entry) => entry.dateKey >= cutoff);
+  if (kept.length !== memories.length) {
+    memories = kept;
+    saveMemories();
+  }
 }
 
 function formatDateLabel(key) {
