@@ -217,7 +217,7 @@ function respond(text) {
 function addMessage(html, type) {
   const row = document.createElement('div');
   row.className = `message-row ${type}-row`;
-  const avatar = type === 'assistant' ? '<div class="avatar small-avatar bot-avatar" aria-hidden="true">🗂️</div>' : '';
+  const avatar = type === 'assistant' ? '<div class="avatar small-avatar bot-avatar" aria-hidden="true">R</div>' : '';
   row.innerHTML = type === 'assistant'
     ? `${avatar}<div class="bubble assistant-bubble"><div>${html}</div><time>${timeNow()}</time></div>`
     : `<div class="bubble user-bubble"><div>${html}</div><time>${timeNow()}</time></div>`;
@@ -229,7 +229,7 @@ function sendMessage(text) {
   addMessage(escapeHtml(text), 'user');
   const typing = document.createElement('div');
   typing.className = 'message-row assistant-row';
-  typing.innerHTML = '<div class="avatar small-avatar bot-avatar" aria-hidden="true">🗂️</div><div class="bubble assistant-bubble typing">Recall is checking...</div>';
+  typing.innerHTML = '<div class="avatar small-avatar bot-avatar" aria-hidden="true">R</div><div class="bubble assistant-bubble typing">Recall is checking...</div>';
   chatWall.appendChild(typing);
   chatWall.scrollTop = chatWall.scrollHeight;
   window.setTimeout(() => {
