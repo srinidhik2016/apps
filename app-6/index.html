@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1120" />
+    <meta name="description" content="MarketPulse watches your stocks and notifies you when prices move." />
+    <title>MarketPulse</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <a class="back-button" href="../" aria-label="Back to apps" title="Back to apps">‹</a>
+        <div class="brand-mark" aria-hidden="true">📈</div>
+        <div class="brand-copy">
+          <h1>MarketPulse</h1>
+          <p>Live-style stock watchlist with alerts</p>
+        </div>
+        <button class="pill-button" id="install-button" type="button" hidden>Install app</button>
+        <button class="pill-button" id="notify-button" type="button">Enable alerts</button>
+      </header>
+
+      <section class="add-stock">
+        <form id="add-form">
+          <div class="field">
+            <label for="symbol-input">Symbol</label>
+            <input id="symbol-input" maxlength="6" placeholder="AAPL" required autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="price-input">Starting price ($)</label>
+            <input id="price-input" type="number" min="0.01" step="0.01" placeholder="185.00" required />
+          </div>
+          <div class="field">
+            <label for="threshold-input">Alert at (%)</label>
+            <input id="threshold-input" type="number" min="0.1" max="50" step="0.1" value="2" required />
+          </div>
+          <button class="add-button" type="submit">Add to watchlist</button>
+        </form>
+      </section>
+
+      <section class="watchlist-section">
+        <div class="section-head">
+          <h2>Watchlist</h2>
+          <button class="pill-button" id="download-button" type="button">Download report</button>
+        </div>
+        <div class="watchlist" id="watchlist" aria-live="polite">
+          <p class="empty-note" id="empty-note">Add a stock above to start watching its price.</p>
+        </div>
+      </section>
+
+      <section class="alerts-section">
+        <h2>Alerts</h2>
+        <ul class="alerts-log" id="alerts-log">
+          <li class="empty-note">No alerts yet. You'll see a note here when a price crosses its threshold.</li>
+        </ul>
+      </section>
+    </main>
+
+    <div class="toast-stack" id="toast-stack" aria-live="assertive"></div>
+
+    <script src="./app.js?v=1"></script>
+  </body>
+</html>

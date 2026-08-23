@@ -13,3 +13,4 @@ Open [index.html](index.html) to view the landing page that links to all apps.
 - [App 3 - Name Spinner](app-3/index.html)
 - [App 4 - Mathly](app-4/index.html)
 - [App 5 - Recall](app-5/index.html)
+- [App 6 - MarketPulse](app-6/index.html)
