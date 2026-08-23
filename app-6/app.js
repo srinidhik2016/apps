@@ -48,21 +48,41 @@ function formatTime(timestamp) {
   return new Intl.DateTimeFormat('en', { hour: 'numeric', minute: '2-digit', second: '2-digit' }).format(new Date(timestamp));
 }
 
+function buildSparkline(history) {
+  if (history.length < 2) {
+    return '<svg class="sparkline" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,15 100,15" /></svg>';
+  }
+  const min = Math.min(...history);
+  const max = Math.max(...history);
+  const range = max - min || 1;
+  const points = history
+    .map((price, index) => {
+      const x = (index / (history.length - 1)) * 100;
+      const y = 28 - ((price - min) / range) * 26;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(' ');
+  return `<svg class="sparkline" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><polyline points="${points}" /></svg>`;
+}
+
 function renderWatchlist() {
   emptyNote.hidden = watchlist.length > 0;
   watchlistEl.querySelectorAll('.stock-card').forEach((card) => card.remove());
 
+  const now = Date.now();
   watchlist.forEach((stock) => {
     const changeSinceAdded = ((stock.price - stock.basePrice) / stock.basePrice) * 100;
     const direction = changeSinceAdded > 0 ? 'up' : changeSinceAdded < 0 ? 'down' : 'flat';
+    const isHighlighted = stock.highlightUntil && now < stock.highlightUntil;
 
     const card = document.createElement('article');
-    card.className = 'stock-card';
+    card.className = `stock-card ${direction}${isHighlighted ? ' changed' : ''}`;
     card.innerHTML = `
       <div class="stock-head">
         <span class="stock-symbol">${stock.symbol}</span>
         <button class="remove-button" data-symbol="${stock.symbol}" aria-label="Remove ${stock.symbol}" title="Remove">✕</button>
       </div>
+      ${buildSparkline(stock.history)}
       <p class="stock-price">${formatMoney(stock.price)}</p>
       <p class="stock-change ${direction}">${formatPercent(changeSinceAdded)} since added</p>
       <p class="stock-meta">Alert threshold: ${stock.threshold}%</p>
@@ -101,6 +121,7 @@ function recordAlert(stock, direction, changePercent) {
   const message = `${direction === 'up' ? 'jumped' : 'dropped'} ${Math.abs(changePercent).toFixed(2)}% to ${formatMoney(stock.price)}`;
   alerts.unshift({ symbol: stock.symbol, message, direction, timestamp: Date.now() });
   alerts = alerts.slice(0, MAX_ALERTS);
+  stock.highlightUntil = Date.now() + 2500;
   saveAlerts();
   renderAlerts();
   showToast(`${stock.symbol} ${message}`, direction);
@@ -110,12 +131,15 @@ function recordAlert(stock, direction, changePercent) {
   }
 }
 
+const HISTORY_LENGTH = 20;
+
 function tick() {
   if (watchlist.length === 0) return;
   watchlist.forEach((stock) => {
     const volatility = 0.012;
     const drift = (Math.random() * 2 - 1) * volatility;
     stock.price = Math.max(0.01, stock.price * (1 + drift));
+    stock.history = [...(stock.history || [stock.price]), stock.price].slice(-HISTORY_LENGTH);
 
     const changeFromLastAlert = ((stock.price - stock.lastAlertPrice) / stock.lastAlertPrice) * 100;
     if (Math.abs(changeFromLastAlert) >= stock.threshold) {
@@ -140,7 +164,7 @@ addForm.addEventListener('submit', (event) => {
     return;
   }
 
-  watchlist.push({ symbol, basePrice: price, price, threshold, lastAlertPrice: price, addedAt: Date.now() });
+  watchlist.push({ symbol, basePrice: price, price, threshold, lastAlertPrice: price, addedAt: Date.now(), history: [price] });
   saveWatchlist();
   renderWatchlist();
   addForm.reset();
