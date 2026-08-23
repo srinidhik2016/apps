@@ -82,7 +82,7 @@ function renderWatchlist() {
         <span class="stock-symbol">${stock.symbol}</span>
         <button class="remove-button" data-symbol="${stock.symbol}" aria-label="Remove ${stock.symbol}" title="Remove">✕</button>
       </div>
-      ${buildSparkline(stock.history)}
+      ${buildSparkline(stock.history || [stock.price])}
       <p class="stock-price">${formatMoney(stock.price)}</p>
       <p class="stock-change ${direction}">${formatPercent(changeSinceAdded)} since added</p>
       <p class="stock-meta">Alert threshold: ${stock.threshold}%</p>
@@ -126,7 +126,7 @@ function recordAlert(stock, direction, changePercent) {
   renderAlerts();
   showToast(`${stock.symbol} ${message}`, direction);
 
-  if (Notification.permission === 'granted') {
+  if ('Notification' in window && Notification.permission === 'granted') {
     new Notification(`${stock.symbol} price alert`, { body: `${stock.symbol} ${message}` });
   }
 }
@@ -154,7 +154,7 @@ function tick() {
 
 addForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  const symbol = symbolInput.value.trim().toUpperCase();
+  const symbol = symbolInput.value.trim().toUpperCase().replace(/[^A-Z0-9.]/g, '');
   const price = Number(priceInput.value);
   const threshold = Number(thresholdInput.value);
 
