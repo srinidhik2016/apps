@@ -1,5 +1,6 @@
 const STORAGE_KEY = 'marketpulse-watchlist';
 const ALERTS_KEY = 'marketpulse-alerts';
+const QUIET_KEY = 'marketpulse-quiet-hours';
 const TICK_MS = 3000;
 const MAX_ALERTS = 50;
 
@@ -14,6 +15,9 @@ const notifyButton = document.querySelector('#notify-button');
 const installButton = document.querySelector('#install-button');
 const downloadButton = document.querySelector('#download-button');
 const toastStack = document.querySelector('#toast-stack');
+const quietEnabledInput = document.querySelector('#quiet-enabled');
+const quietStartInput = document.querySelector('#quiet-start');
+const quietEndInput = document.querySelector('#quiet-end');
 
 function loadJSON(key, fallback) {
   try {
@@ -26,6 +30,7 @@ function loadJSON(key, fallback) {
 
 let watchlist = loadJSON(STORAGE_KEY, []);
 let alerts = loadJSON(ALERTS_KEY, []);
+let quietHours = loadJSON(QUIET_KEY, { enabled: false, start: '22:00', end: '07:00' });
 
 function saveWatchlist() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(watchlist));
@@ -33,6 +38,24 @@ function saveWatchlist() {
 
 function saveAlerts() {
   localStorage.setItem(ALERTS_KEY, JSON.stringify(alerts));
+}
+
+function saveQuietHours() {
+  localStorage.setItem(QUIET_KEY, JSON.stringify(quietHours));
+}
+
+function isWithinQuietHours() {
+  if (!quietHours.enabled) return false;
+  const [startH, startM] = quietHours.start.split(':').map(Number);
+  const [endH, endM] = quietHours.end.split(':').map(Number);
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const startMinutes = startH * 60 + startM;
+  const endMinutes = endH * 60 + endM;
+  if (startMinutes === endMinutes) return false;
+  return startMinutes < endMinutes
+    ? nowMinutes >= startMinutes && nowMinutes < endMinutes
+    : nowMinutes >= startMinutes || nowMinutes < endMinutes;
 }
 
 function formatMoney(value) {
@@ -142,7 +165,7 @@ function tick() {
     stock.history = [...(stock.history || [stock.price]), stock.price].slice(-HISTORY_LENGTH);
 
     const changeFromLastAlert = ((stock.price - stock.lastAlertPrice) / stock.lastAlertPrice) * 100;
-    if (Math.abs(changeFromLastAlert) >= stock.threshold) {
+    if (Math.abs(changeFromLastAlert) >= stock.threshold && !isWithinQuietHours()) {
       const direction = changeFromLastAlert > 0 ? 'up' : 'down';
       stock.lastAlertPrice = stock.price;
       recordAlert(stock, direction, changeFromLastAlert);
@@ -178,6 +201,23 @@ watchlistEl.addEventListener('click', (event) => {
   watchlist = watchlist.filter((stock) => stock.symbol !== button.dataset.symbol);
   saveWatchlist();
   renderWatchlist();
+});
+
+quietEnabledInput.checked = quietHours.enabled;
+quietStartInput.value = quietHours.start;
+quietEndInput.value = quietHours.end;
+
+quietEnabledInput.addEventListener('change', () => {
+  quietHours.enabled = quietEnabledInput.checked;
+  saveQuietHours();
+});
+quietStartInput.addEventListener('change', () => {
+  quietHours.start = quietStartInput.value;
+  saveQuietHours();
+});
+quietEndInput.addEventListener('change', () => {
+  quietHours.end = quietEndInput.value;
+  saveQuietHours();
 });
 
 notifyButton.addEventListener('click', async () => {

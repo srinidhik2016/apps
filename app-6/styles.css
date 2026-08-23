@@ -73,7 +73,7 @@ body {
 .pill-button:active { transform: translateY(1px); }
 .pill-button:disabled { opacity: .55; cursor: default; transform: none; }
 
-.add-stock, .watchlist-section, .alerts-section {
+.add-stock, .quiet-hours-section, .watchlist-section, .alerts-section {
   margin-top: 22px;
   padding: 22px;
   border: 1px solid var(--panel-line);
@@ -113,6 +113,23 @@ body {
 
 .section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
 .section-head h2, .alerts-section h2 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+
+.toggle { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; }
+.toggle input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+
+.quiet-range { display: flex; flex-wrap: wrap; gap: 16px; }
+.quiet-range input[type='time'] {
+  padding: 10px 13px;
+  border: 1px solid var(--panel-line);
+  border-radius: 9px;
+  color: var(--ink);
+  background: var(--bg-soft);
+  font: 14px 'Inter', sans-serif;
+  outline: none;
+  color-scheme: dark;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.quiet-range input[type='time']:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 
 .watchlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
 .empty-note { color: var(--muted); font-size: 13px; margin: 0; }
